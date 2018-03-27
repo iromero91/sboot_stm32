@@ -2,7 +2,7 @@ OUTDIR     ?= build
 FWNAME     ?= firmware
 SWNAME     ?= fwcrypt
 FWTOOLS    ?= arm-none-eabi-
-CMSIS      ?= $(abspath ../CMSIS)
+CMSIS      ?= $(abspath CMSIS)
 CMSISDEV   ?= $(CMSIS)/Device
 
 ifeq ($(OS),Windows_NT)
@@ -89,6 +89,7 @@ $(FWODIR)/lib%.a: %
 	@echo building module $<
 	@$(MAKE) module -C $< MODULE=$(abspath $@) DEFINES='$(FWDEFS) $(MDEFS)' CFLAGS='$(FWXFLAGS) $(FWCPU)' CMSIS='$(CMSIS)'
 
+
 $(SWOBJ): | $(SWODIR)
 
 $(FWOBJ): | $(FWODIR)
@@ -171,7 +172,7 @@ stm32l151x6a :
 stm32l151x8a :
 	$(MAKE) fwclean bootloader FWCPU='-mcpu=cortex-m3' \
 	                           FWSTARTUP='mcu/stm32l1xx.S' \
-	                           FWDEFS='STM32L1 STM32L151xBA'\
+	                           FWDEFS='STM32L1 STM32L151xBA' \
 	                           LDPARAMS='ROMLEN=64K RAMLEN=32K'
 
 stm32l151xba :
@@ -351,7 +352,7 @@ stm32f103x4 :
 stm32f103x6 :
 	$(MAKE) fwclean bootloader FWCPU='-mcpu=cortex-m3' \
 	                           FWSTARTUP='mcu/stm32f103.S' \
-	                           FWDEFS='STM32F1 STM32F103x6 USBD_ASM_DRIVER' \
+	                           FWDEFS='STM32F1 STM32F103x6 USBD_ASM_DRIVER'\
 	                           LDPARAMS='ROMLEN=32K RAMLEN=10K'
 
 stm32f103x8 :
