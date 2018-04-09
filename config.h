@@ -49,15 +49,15 @@
 /* USB PID */
 #define DFU_DEVICE_ID       0xDF11
 /* USB manufacturer string */
-#define DFU_STR_MANUF       "Your company name"
+#define DFU_STR_MANUF       "FLEx Lighting LLC"
 /* USB product sting */
-#define DFU_STR_PRODUCT     "Secure bootloader"
+#define DFU_STR_PRODUCT     "FLP Dev Kit"
 /* USB string for DFU configureation string descriptor. */
 #define DFU_DSC_CONFIG      _ENABLE
 #define DFU_STR_CONFIG      "DFU"
 /* USB string for DFU flash interface string descriptor. */
 #define DFU_DSC_FLASH       _ENABLE
-#define DFU_STR_FLASH       "Internal flash"
+#define DFU_STR_FLASH       "Internal flash 0x8002000"
 /* USB string for DFU EEPROM interface sreing descriptor */
 #define DFU_DSC_EEPROM      _ENABLE
 #define DFU_STR_EEPROM       "Internal EEPROM"
@@ -79,11 +79,11 @@
 #define DFU_DBLRESET_MS     300
 /* User application address. _AUTO or page aligned address.
  * for _AUTO check __app_start address in output linker map file*/
-#define DFU_APP_START       _AUTO
+#define DFU_APP_START       0x8002000
 /* User application size. _AUTO or required size in bytes. */
 #define DFU_APP_SIZE        _AUTO
 /* Cipher to use. set _DISABLE or choose from implemented ciphers */
-#define DFU_CIPHER          DFU_CIPHER_GOST
+#define DFU_CIPHER          _DISABLE
 /** DFU secure key. */
 #define DFU_AES_KEY_A       0x2D, 0x4D, 0x61, 0x6B, 0x65, 0x4C, 0x6F, 0x76, \
                             0x65, 0x4E, 0x6F, 0x74, 0x57, 0x61, 0x72, 0x2D
