@@ -35,7 +35,7 @@
 
 /* CONFIG STARTS HERE */
 /* Skip unwanted dfuDNLOAD_SYNC phase. Slightly improve speed, but don't meets DFU1.1 state diagram */
-#define DFU_DNLOAD_NOSYNC   _ENABLE
+#define DFU_DNLOAD_NOSYNC   _DISABLE
 /** Add extra DFU interface for EEPROM */
 #define DFU_INTF_EEPROM     _AUTO
 /** Firmware can be uploaded from device */
@@ -45,13 +45,13 @@
 /** Memory Readout Protection level **/
 #define DFU_SEAL_LEVEL      0
 /* USB VID */
-#define DFU_VENDOR_ID       0x0483
+#define DFU_VENDOR_ID       0x1209
 /* USB PID */
-#define DFU_DEVICE_ID       0xDF11
+#define DFU_DEVICE_ID       0xDB42
 /* USB manufacturer string */
-#define DFU_STR_MANUF       "FLEx Lighting LLC"
+#define DFU_STR_MANUF       "FLEx Lighting"
 /* USB product sting */
-#define DFU_STR_PRODUCT     "FLP Dev Kit"
+#define DFU_STR_PRODUCT     "FLEx FLP Dev Kit (DFU Mode)"
 /* USB string for DFU configureation string descriptor. */
 #define DFU_DSC_CONFIG      _ENABLE
 #define DFU_STR_CONFIG      "DFU"
