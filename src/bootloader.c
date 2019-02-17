@@ -14,6 +14,7 @@
  */
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include "config.h"
 #include "stm32.h"
@@ -22,6 +23,7 @@
 #include "descriptors.h"
 #include "flash.h"
 #include "crypto.h"
+#include "usb_wcid.h"
 
 /* Checking for the EEPROM */
 #if defined(DATA_EEPROM_BASE)
@@ -223,8 +225,36 @@ static void dfu_reset(usbd_device *dev, uint8_t ev, uint8_t ep) {
     NVIC_SystemReset();
 }
 
+#if DFU_WCID == _ENABLE
+uint16_t USB_GetOSFeatureDescriptor(const uint8_t InterfaceNumber,
+                                    const uint8_t wIndex,
+                                    const uint8_t Recipient,
+                                    void** DescriptorAddress);
+#endif
+
 static usbd_respond dfu_control (usbd_device *dev, usbd_ctlreq *req, usbd_rqc_callback *callback) {
     (void)callback;
+
+#if DFU_WCID == _ENABLE
+    if ((req->bmRequestType
+			& (USB_REQ_DIRECTION | USB_REQ_TYPE)) == (USB_REQ_DEVTOHOST | USB_REQ_VENDOR)) {
+		switch (req->bRequest) {
+
+		case REQ_GetOSFeatureDescriptor:
+			dev->status.data_count = USB_GetOSFeatureDescriptor(req->wValue >> 8,
+					req->wIndex, req->bmRequestType & USB_REQ_RECIPIENT,
+					(void** )&dev->status.data_ptr);
+
+			if (dev->status.data_count == NO_DESCRIPTOR)
+			{
+				return usbd_fail;
+			}
+
+			return usbd_ack;
+		}
+	}
+#endif
+
     if ((req->bmRequestType  & (USB_REQ_TYPE | USB_REQ_RECIPIENT)) == (USB_REQ_STANDARD | USB_REQ_INTERFACE)) {
         switch (req->bRequest) {
         case USB_STD_SET_INTERFACE:

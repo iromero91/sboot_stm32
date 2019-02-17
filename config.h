@@ -90,6 +90,9 @@
 #define DFU_AES_KEY_B       0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, \
                             0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F
 
+#define DFU_WCID _ENABLE
+#define DFU_WCID_DEVINSTANCE "{1B782F58-EAD7-4D74-8155-763E5E511ED7}"
+
 /** cipher initialization vector for CBC and CHACHA */
 #define DFU_AES_NONCE0      0x11223344
 #define DFU_AES_NONCE1      0x55667788

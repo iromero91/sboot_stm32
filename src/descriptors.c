@@ -20,6 +20,7 @@
 #include "config.h"
 #include "usb.h"
 #include "usb_dfu.h"
+#include "usb_wcid.h"
 
 /* Checking for the EEPROM */
 #if (defined(DATA_EEPROM_BASE) || defined(FLASH_EEPROM_BASE)) && (DFU_INTF_EEPROM != _DISABLE)
@@ -151,6 +152,82 @@ static const struct usb_string_descriptor * const dtable[] = {
 #endif
 };
 
+#if DFU_WCID == _ENABLE
+static const USB_OSDescriptor_t OSDescriptorString = {
+		.Size = 18, // always 18 bytes
+		.Type = USB_DTYPE_STRING,
+		.Signature = {
+				0x4D, 0x00, 0x53, 0x00,
+				0x46, 0x00, 0x54, 0x00,
+				0x31, 0x00, 0x30, 0x00,
+				0x30, 0x00, }, // Signature: "MSFT100" unicode
+		.VendorCode = REQ_GetOSFeatureDescriptor,
+		.Reserved=0,
+};
+
+static const USB_OSCompatibleIDDescriptor_t DevCompatIDs =
+{
+	.TotalLength= sizeof(USB_OSCompatibleIDDescriptor_t),
+	.Version= 0x0100,
+	.Index= EXTENDED_COMPAT_ID_DESCRIPTOR,
+	.TotalSections= 1,
+	.CompatID= {
+		.FirstInterfaceNumber= 0,
+		.Reserved= 0x01,
+		.CompatibleID="WINUSB"},
+};
+
+static const USB_OSPropertiesDescriptor_t DevProperties =
+{
+		.TotalLength = 10 + 132,
+		.Version =	0x0100,
+		.Index = EXTENDED_PROPERTIES_DESCRIPTOR,
+		.TotalSections = NB_PROPERTIES,
+
+		.Length = 132,
+		.Type = 1,//REG_SZ
+		.NameLength =	40,
+		.NameValue = {u"DeviceInterfaceGUID"},
+		.DataLength= 78,
+		.DataValue = {CAT(u,DFU_WCID_DEVINSTANCE)},
+
+};
+
+uint16_t USB_GetOSFeatureDescriptor(const uint8_t InterfaceNumber,
+                                    const uint8_t wIndex,
+                                    const uint8_t Recipient,
+                                    void** DescriptorAddress)
+{
+	const void* Address = NULL;
+	uint16_t    Size    = NO_DESCRIPTOR;
+
+	/* Check if an OS Feature Descriptor is being requested */
+	switch(wIndex)
+	{
+	case EXTENDED_COMPAT_ID_DESCRIPTOR:
+		if (Recipient == USB_REQ_DEVICE) { /* Ignore InterfaceNumber as this is a Device Request */
+			Address = &DevCompatIDs;
+			Size = DevCompatIDs.TotalLength;
+		}
+		break;
+	case EXTENDED_PROPERTIES_DESCRIPTOR:
+	default:
+		if ((InterfaceNumber == 0)
+				&& ((Recipient == USB_REQ_INTERFACE)
+						|| (Recipient == USB_REQ_DEVICE))) {
+
+			Address = &DevProperties;
+			Size = DevProperties.TotalLength;
+		}
+		break;
+	}
+
+	*DescriptorAddress = (void*)Address;
+	return Size;
+}
+
+#endif
+
 usbd_respond dfu_get_descriptor(usbd_ctlreq *req, void **address, uint16_t *len) {
     const uint8_t dtype = req->wValue >> 8;
     const uint8_t dindx = req->wValue & 0xFF;
@@ -169,9 +246,17 @@ usbd_respond dfu_get_descriptor(usbd_ctlreq *req, void **address, uint16_t *len)
     case USB_DTYPE_STRING:
         if (dindx < _countof(dtable)) {
             desc = dtable[dindx];
-        } else {
-            return usbd_fail;
-        }
+		} else {
+#if DFU_WCID == _ENABLE
+			if (dindx == 0xEE) {
+				desc = &OSDescriptorString;
+			} else {
+				return usbd_fail;
+			}
+#else
+			return usbd_fail;
+#endif
+		}
         break;
     default:
         return usbd_fail;
@@ -181,3 +266,4 @@ usbd_respond dfu_get_descriptor(usbd_ctlreq *req, void **address, uint16_t *len)
     *address = (void*)desc;
     return usbd_ack;
 }
+
